@@ -9,4 +9,8 @@
       seq
       (map (comp read-string str))))
 
-(println (apply + input))
+(def circular (conj input (last input)))
+(def window (partition 2 1 circular))
+(def matching (filter #(apply = %) window))
+(def sum (apply + (map first matching)))
+(println (str "--- Day 1: Inverse Captcha ---\n" sum))
