@@ -9,8 +9,17 @@
       seq
       (map (comp read-string str))))
 
-(def circular (conj input (last input)))
-(def window (partition 2 1 circular))
-(def matching (filter #(apply = %) window))
-(def sum (apply + (map first matching)))
-(println (str "--- Day 1: Inverse Captcha ---\n" sum))
+(defn first-last-equal? [arr]
+  (= (first arr) (last arr)))
+
+(defn matching-n-step-sum [n, arr]
+  (->> arr
+       (partition n 1)
+       (filter first-last-equal?)
+       (map first)
+       (apply +)))
+
+(println (matching-n-step-sum 2 (conj input (last input))))
+(println (matching-n-step-sum
+           (inc (/ (count input) 2))
+           (concat input (take (/ (count input) 2) input))))
