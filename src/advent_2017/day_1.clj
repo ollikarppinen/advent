@@ -5,9 +5,7 @@
   (->> "advent_2017/day1"
       io/resource
       slurp
-      char-array
-      seq
-      (map (comp read-string str))))
+       (map (comp read-string str))))
 
 (defn first-last-equal? [arr]
   (= (first arr) (last arr)))
