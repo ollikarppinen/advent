@@ -19,3 +19,23 @@
        (apply +)))
 
 (println res)
+
+(defn all-pairs [arr]
+  (clojure.math.combinatorics/combinations arr 2))
+
+(defn even-division [arr]
+  (let [a (apply max arr)
+        b (apply min arr)]
+    (if (zero? (mod a b))
+      (/ a b)
+      0)))
+
+(defn even-div-sum [arr]
+  (->> arr
+       all-pairs
+       (map even-division)
+       (apply +)))
+
+(println (->> input
+              (map even-div-sum)
+              (apply +)))
