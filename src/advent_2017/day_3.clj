@@ -45,39 +45,7 @@
   (+ (/ (dec (closest-odd-sqr-root x)) 2)
      (sideways-dist x)))
 
-(println (manhattan-distance input))
-
-(defn up [location]
-  (let [[x y] location]
-    [x (inc y)]))
-(defn down [location]
-  (let [[x y] location]
-    [x (dec y)]))
-(defn left [location]
-  (let [[x y] location]
-    [(dec x) y]))
-(defn right [location]
-  (let [[x y] location]
-    [(inc x) y]))
-
-(def direction {{:up false :down false :right false :left false} right
-                {:up false :down false :right false :left true } up
-                {:up false :down true  :right false :left false} left
-                {:up false :down true  :right true  :left false} left
-                {:up false :down false :right true  :left false} down
-                {:up true  :down false :right true  :left false} down
-                {:up true  :down false :right false :left false} right
-                {:up true  :down false :right false :left true } right
-                {:up false :down true  :right false :left true } up})
-
-(defn next-location [spiral, location]
-  (let [move (get direction
-                  {:up (contains? spiral (up location))
-                   :down (contains? spiral (down location))
-                   :left (contains? spiral (left location))
-                   :right (contains? spiral (right location))
-                   })]
-    (move location)))
+(println "Task 1:" (manhattan-distance input))
 
 (def adj [[1, 1], [0, 1], [1, 0], [-1, 0], [-1, -1], [0, -1], [1, -1], [-1, 1]])
 (defn adj-sum [spiral, location]
@@ -87,15 +55,33 @@
        (apply +)))
 
 (defn update-spiral [spiral, location, i]
-  (let [k (next-location spiral location)
-        v {:i (inc i) :key k :sum (adj-sum spiral k)}]
-    (conj spiral {k v})))
+  (conj spiral
+        {location
+         {:i (inc i) :key location :sum (adj-sum spiral location)}}))
 
-(loop [i 1 spiral { [0 0] { :key [0 0] :i 1 :sum 1 }} location [0 0]]
-  (let [sum (get-in spiral [location :sum])]
+(defn update-location [direction location]
+  (let [[x y] location]
+    (cond
+      (= direction :left)  [(inc x) y]
+      (= direction :up)    [x (inc y)]
+      (= direction :right) [(dec x) y]
+      (= direction :down)  [x (dec y)])))
+
+(def next-direction {:left :up :up :right :right :down :down :left})
+(defn update-direction [spiral direction location]
+  (let [next-dir (get next-direction direction)
+        next-dir-location (update-location next-dir location)]
+    (if (contains? spiral next-dir-location) direction next-dir)))
+
+(def spiral-init { [0 0] { :key [0 0] :i 1 :sum 1 }})
+
+(loop [i 1 spiral spiral-init location [0 0] direction :left]
+  (let [sum (get-in spiral [location :sum])
+        next-location (update-location direction location)]
     (if (> sum input)
-      (println sum)
+      (println "Task 2:" sum)
       (recur
         (inc i)
-        (update-spiral spiral location i)
-        (next-location spiral location)))))
+        (update-spiral spiral next-location i)
+        next-location
+        (update-direction spiral direction next-location)))))
