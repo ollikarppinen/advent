@@ -1,6 +1,8 @@
 (ns advent-2017.day-3
   (require [clojure.test :as test]))
 
+(def input 347991)
+
 (defn closest-odd-sqr-root [x]
   (loop [cnt 1]
     (if (>= (* cnt cnt) x)
@@ -43,10 +45,57 @@
   (+ (/ (dec (closest-odd-sqr-root x)) 2)
      (sideways-dist x)))
 
-(test/are [x y] (= x (manhattan-distance y))
-                0 1
-                3 12
-                2 23
-                31 1024)
+(println (manhattan-distance input))
 
-(println (manhattan-distance 347991))
+(defn up [location]
+  (let [[x y] location]
+    [x (inc y)]))
+(defn down [location]
+  (let [[x y] location]
+    [x (dec y)]))
+(defn left [location]
+  (let [[x y] location]
+    [(dec x) y]))
+(defn right [location]
+  (let [[x y] location]
+    [(inc x) y]))
+
+(def direction {{:up false :down false :right false :left false} right
+                {:up false :down false :right false :left true } up
+                {:up false :down true  :right false :left false} left
+                {:up false :down true  :right true  :left false} left
+                {:up false :down false :right true  :left false} down
+                {:up true  :down false :right true  :left false} down
+                {:up true  :down false :right false :left false} right
+                {:up true  :down false :right false :left true } right
+                {:up false :down true  :right false :left true } up})
+
+(defn next-location [spiral, location]
+  (let [move (get direction
+                  {:up (contains? spiral (up location))
+                   :down (contains? spiral (down location))
+                   :left (contains? spiral (left location))
+                   :right (contains? spiral (right location))
+                   })]
+    (move location)))
+
+(def adj [[1, 1], [0, 1], [1, 0], [-1, 0], [-1, -1], [0, -1], [1, -1], [-1, 1]])
+(defn adj-sum [spiral, location]
+  (->> adj
+       (mapv #(mapv + location %))
+       (mapv #(get-in spiral [%, :sum] 0))
+       (apply +)))
+
+(defn update-spiral [spiral, location, i]
+  (let [k (next-location spiral location)
+        v {:i (inc i) :key k :sum (adj-sum spiral k)}]
+    (conj spiral {k v})))
+
+(loop [i 1 spiral { [0 0] { :key [0 0] :i 1 :sum 1 }} location [0 0]]
+  (let [sum (get-in spiral [location :sum])]
+    (if (> sum input)
+      (println sum)
+      (recur
+        (inc i)
+        (update-spiral spiral location i)
+        (next-location spiral location)))))
