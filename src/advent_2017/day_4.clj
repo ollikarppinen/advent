@@ -11,9 +11,9 @@
 
 (defn just-ones? [lst]
   (every? #(= 1 %) lst))
-(def count-valid-passphrases
+(defn count-valid-passphrases [lst]
   (->>
-    input
+    lst
     (map (comp
            just-ones?
            vals
@@ -21,5 +21,6 @@
     (filter true?)
     count))
 
-(println count-valid-passphrases)
+(println (count-valid-passphrases input))
+(println (count-valid-passphrases (map #(map sort %) input)))
 
